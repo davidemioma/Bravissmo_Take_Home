@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "bun index.ts",
-    "dev": "bun --watch index.ts",
+    "dev": "bun run db:generate && bun run db:migrate && bun --hot index.ts",
     "db:generate": "bun drizzle-kit generate",
-    "db:migrate": "bun migrate.ts",
+    "db:migrate": "bun drizzle-kit migrate",
     "db:studio": "bunx drizzle-kit studio"
   },
   "private": true,

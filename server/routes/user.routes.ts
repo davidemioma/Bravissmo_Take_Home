@@ -3,6 +3,7 @@ import { db } from "../database";
 import { eq } from "drizzle-orm";
 import { users } from "../database/schema";
 import { OnBoardSchema } from "../utils/validators";
+import verifyAuth from "../middleware/verify-auth";
 
 const router = express.Router();
 
@@ -49,6 +50,11 @@ router.post("/onboard", async (req, res) => {
 
     res.status(500).json({ success: false });
   }
+});
+
+// GET /api/user
+router.get("/user", verifyAuth, async (req, res) => {
+  res.status(200).json({ user: req.currentUser });
 });
 
 export default router;
