@@ -4,6 +4,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import logger from "./middleware/logger";
 import userRoutes from "./routes/user.routes";
+import productRoutes from "./routes/product.routes";
 import { corsOptions } from "./utils/cors-options";
 
 const app = express();
@@ -13,7 +14,7 @@ const port = process.env.PORT || 8080;
 //Middleware
 app.use(helmet());
 app.use(cors(corsOptions));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.disable("x-powered-by");
@@ -25,6 +26,8 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api", userRoutes);
+
+app.use("/api/products", productRoutes);
 
 // Run server
 app.listen(port, () => {

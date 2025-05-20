@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createProduct } from "@/lib/actions/products";
 import {
   ProductSchema,
   ProductTypeEnum,
@@ -63,13 +64,6 @@ const ProductForm = ({ initialProduct }: Props) => {
 
       Object.entries(values).forEach(([key, value]) => {
         if (key === "images") {
-          const files = value as string[] | File[];
-
-          files.forEach((file: string | File) => {
-            if (file !== "" || file !== null || file !== undefined) {
-              formData.append("images", file);
-            }
-          });
         } else if (Array.isArray(value)) {
           formData.append(key, JSON.stringify(value));
         } else {
@@ -77,10 +71,36 @@ const ProductForm = ({ initialProduct }: Props) => {
         }
       });
 
+      // Handle images:
+      const existingImages: string[] = []; // Already uploaded URLs
+
+      const newFiles: File[] = []; // Files to upload
+
+      values.images?.forEach((file) => {
+        if (typeof file === "string") {
+          existingImages.push(file);
+        } else if (file instanceof File) {
+          newFiles.push(file);
+        }
+      });
+
+      formData.append("existingImages", JSON.stringify(existingImages));
+
+      newFiles.forEach((file) => {
+        formData.append("newFiles", file);
+      });
+
       // Create Product
+      const res = await createProduct(formData);
+
+      return res;
     },
-    onSuccess: () => {
-      toast.success("New product created");
+    onSuccess: (res) => {
+      if (!res.success) {
+        toast.error("Unable to create product!");
+      }
+
+      toast.success(res.message);
 
       form.reset();
     },

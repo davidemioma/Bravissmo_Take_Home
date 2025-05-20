@@ -79,9 +79,10 @@ const ListInput = ({
           {values.map((value, index) => (
             <li
               key={index}
-              className="w-fit flex items-center justify-between p-2 bg-gray-50 rounded-md"
+              className="w-fit flex items-center justify-between py-1 px-2 bg-gray-50 rounded-md"
             >
-              <span>{value}</span>
+              <span className="text-xs">{value}</span>
+
               <Button
                 type="button"
                 variant="ghost"

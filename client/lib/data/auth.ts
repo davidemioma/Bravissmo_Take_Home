@@ -24,5 +24,5 @@ export const getCurrentUser = cache(async () => {
     return null;
   }
 
-  return res.data.user as UserType;
+  return res.data.user as UserType | null;
 });

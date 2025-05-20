@@ -6,6 +6,7 @@ import {
   pgEnum,
   real,
   integer,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const ProductType = pgEnum("productType", [
@@ -30,8 +31,11 @@ export const users = pgTable("users", {
 
 export const products = pgTable("products", {
   id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("userId")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
   name: text("name").notNull(),
-  images: text("image").array(),
+  images: varchar("images").array(),
   type: ProductType("productType").notNull(),
   color: text("color").notNull(),
   price: real("price").notNull(),

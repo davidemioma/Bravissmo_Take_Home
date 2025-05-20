@@ -1,6 +1,6 @@
 {
-  "id": "643dd9ac-e49c-4daa-9663-fa87fb341252",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "72ea8be3-5099-4db4-a0cd-9dfa19a2859c",
+  "prevId": "54202b73-6a35-4f52-8ff7-841a1a75adc5",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -107,9 +107,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "image": {
-          "name": "image",
-          "type": "text[]",
+        "images": {
+          "name": "images",
+          "type": "varchar[]",
           "primaryKey": false,
           "notNull": false
         },

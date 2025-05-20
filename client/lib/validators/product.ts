@@ -14,11 +14,11 @@ export const ProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   type: ProductTypeEnum,
   color: z.string().min(1, "Color is required"),
-  price: z.number().positive("Price must be greater than 0"),
-  quantity: z.number().int().min(0, "Quantity cannot be negative"),
+  price: z.coerce.number().min(0, "Price must be greater than 0"),
+  quantity: z.coerce.number().min(0, "Quantity cannot be negative"),
   sizes: z.array(z.string()),
-  bandSizes: z.array(z.number().int().min(0)),
-  cupSizes: z.array(z.number().int().min(0)),
+  bandSizes: z.array(z.coerce.number().min(0)),
+  cupSizes: z.array(z.coerce.number().min(0)),
   images: z
     .array(
       z.union([

@@ -1,10 +1,12 @@
+"use client";
+
 import React from "react";
 import AuthBtns from "./AuthBtns";
 import UserAccount from "./UserAccount";
-import { getCurrentUser } from "@/lib/data/auth";
+import { useAuth } from "@/providers/auth-provider";
 
-const NavBar = async () => {
-  const currentUser = await getCurrentUser();
+const NavBar = () => {
+  const { user, isLoading, isError } = useAuth();
 
   return (
     <nav className="fixed bg-white top-0 w-full h-12 flex items-center border-b">
@@ -13,7 +15,13 @@ const NavBar = async () => {
 
         <div>Search</div>
 
-        {currentUser ? <UserAccount currentUser={currentUser} /> : <AuthBtns />}
+        {!isError && !isLoading && user ? (
+          <UserAccount currentUser={user} />
+        ) : !isError && !isLoading && !user ? (
+          <AuthBtns />
+        ) : (
+          <div className="w-10 h-10" />
+        )}
       </div>
     </nav>
   );

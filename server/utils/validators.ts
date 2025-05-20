@@ -6,3 +6,9 @@ export const OnBoardSchema = z.object({
   email: z.string().email("Invalid email address"),
   image: z.string().url("Invalid image URL").optional(),
 });
+
+export type FileType = {
+  buffer: Buffer;
+  fileName: string;
+  contentType: string;
+};

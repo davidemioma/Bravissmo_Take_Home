@@ -15,8 +15,6 @@ const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization as string;
 
-    console.log(authHeader);
-
     if (!authHeader?.startsWith("Bearer ")) {
       return next(res.status(401).json({ message: "You are not authorized!" }));
     }
