@@ -37,14 +37,6 @@ router.post(
 
       const parsedImages = JSON.parse(existingImages || "[]");
 
-      console.log("Create Product Body", {
-        body: req.body,
-        parsedSizes,
-        parsedBandSizes,
-        parsedCupSizes,
-        parsedImages,
-      });
-
       const newFiles = (req.files as Express.Multer.File[]).map((file) => ({
         buffer: file.buffer,
         fileName: file.originalname,
