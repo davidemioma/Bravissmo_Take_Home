@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import Cart from "./Cart";
 import Link from "next/link";
 import AuthBtns from "./AuthBtns";
 import SearchBar from "./SearchBar";
+import { HomeIcon } from "lucide-react";
 import UserAccount from "./UserAccount";
 import { useAuth } from "@/providers/auth-provider";
-import { HomeIcon } from "lucide-react";
 
 const NavBar = () => {
   const { user, isLoading, isError } = useAuth();
@@ -24,13 +25,17 @@ const NavBar = () => {
           <SearchBar />
         </div>
 
-        {!isError && !isLoading && user ? (
-          <UserAccount currentUser={user} />
-        ) : !isError && !isLoading && !user ? (
-          <AuthBtns />
-        ) : (
-          <div className="w-10 h-10" />
-        )}
+        <div className="flex items-center gap-2">
+          {!isError && !isLoading && user ? (
+            <UserAccount currentUser={user} />
+          ) : !isError && !isLoading && !user ? (
+            <AuthBtns />
+          ) : (
+            <div className="w-10 h-10" />
+          )}
+
+          <Cart />
+        </div>
       </div>
     </nav>
   );
