@@ -10,6 +10,8 @@ export const ProductTypeEnum = z.enum([
   "lingerie",
 ]);
 
+export type ProductCustomType = z.infer<typeof ProductTypeEnum>;
+
 export const ProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   type: ProductTypeEnum,

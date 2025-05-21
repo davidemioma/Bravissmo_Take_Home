@@ -3,19 +3,21 @@
 import React from "react";
 import { toast } from "sonner";
 import ListInput from "./ListInput";
-import { colors } from "@/lib/utils";
+import { cn, colors } from "@/lib/utils";
+import { ProductType } from "@/types";
 import FilesUpload from "./FilesUpload";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createProduct } from "@/lib/actions/products";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createProduct, updateProduct } from "@/lib/actions/products";
 import {
   ProductSchema,
   ProductTypeEnum,
   ProductValidator,
+  ProductCustomType,
 } from "@/lib/validators/product";
 import {
   Select,
@@ -32,26 +34,28 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type Props = {
-  initialProduct?: {
-    id: string;
-  };
+  initialProduct?: ProductType;
 };
 
 const ProductForm = ({ initialProduct }: Props) => {
+  const queryClient = useQueryClient();
+
   const form = useForm<ProductValidator>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
-      name: "",
-      images: [],
-      type: "Bras",
-      color: "",
-      quantity: 0,
-      price: 0,
-      sizes: [],
-      bandSizes: [],
-      cupSizes: [],
+      name: initialProduct?.name || "",
+      images: initialProduct?.images || [],
+      type: (initialProduct?.type as ProductCustomType) || "Bras",
+      color: initialProduct?.color || "",
+      quantity: initialProduct?.quantity || 0,
+      price: initialProduct?.price || 0,
+      sizes: initialProduct?.sizes || [],
+      bandSizes: initialProduct?.bandSizes || [],
+      cupSizes: initialProduct?.cupSizes || [],
     },
   });
 
@@ -90,19 +94,36 @@ const ProductForm = ({ initialProduct }: Props) => {
         formData.append("newFiles", file);
       });
 
-      // Create Product
-      const res = await createProduct(formData);
+      // Create or Update Product
+      if (initialProduct) {
+        return await updateProduct({
+          id: initialProduct.id,
+          values: formData,
+        });
+      }
 
-      return res;
+      return await createProduct(formData);
     },
     onSuccess: (res) => {
       if (!res.success) {
-        toast.error("Unable to create product!");
+        toast.error(
+          `Unable to ${initialProduct ? "update" : "create"} product!`
+        );
+
+        return;
       }
 
       toast.success(res.message);
 
-      form.reset();
+      if (initialProduct) {
+        queryClient.invalidateQueries({
+          queryKey: ["get-product", initialProduct.id],
+        });
+      }
+
+      if (!initialProduct) {
+        form.reset();
+      }
     },
     onError: (err) => {
       toast.error(err.message);
@@ -115,6 +136,23 @@ const ProductForm = ({ initialProduct }: Props) => {
 
   return (
     <div>
+      {initialProduct && (
+        <div className="mb-5">
+          <Link
+            href={`/products/${initialProduct.id}`}
+            className={cn(
+              buttonVariants({
+                variant: "secondary",
+                className: "border",
+              })
+            )}
+          >
+            <ArrowLeft />
+            Back
+          </Link>
+        </div>
+      )}
+
       <h2
         className="text-xl sm:text-2xl md:text-3xl mb-1 font-bold tracking-tight"
         aria-label={"Add/Update Product"}
@@ -353,11 +391,15 @@ const ProductForm = ({ initialProduct }: Props) => {
             />
           </div>
 
-          <div className="pt-4 flex justify-end">
+          <div className="pt-4 flex gap-4 justify-end">
             <Button type="submit" size="lg" disabled={isPending}>
               {initialProduct
                 ? `${isPending ? "Saving..." : "Save"}`
                 : `${isPending ? "Creating..." : "Create"}`}
+            </Button>
+
+            <Button variant="destructive" size="lg">
+              Delete
             </Button>
           </div>
         </form>

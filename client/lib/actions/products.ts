@@ -30,3 +30,37 @@ export const createProduct = async (values: FormData) => {
     throw new Error("Something went wrong! Internal server error.");
   }
 };
+
+export const updateProduct = async ({
+  id,
+  values,
+}: {
+  id: string;
+  values: FormData;
+}) => {
+  try {
+    const user = await currentUser();
+
+    if (!user) {
+      throw new Error("Unauthorized, Youn need to sign in!");
+    }
+
+    const res = await axiosInstance.patch(`/products/${id}`, values, {
+      headers: {
+        Authorization: `Bearer ${user.id}`,
+      },
+    });
+
+    const result = await res.data;
+
+    if (res.status !== 200) {
+      throw new Error("Unable to update product!");
+    }
+
+    return { success: result.success, message: result.message };
+  } catch (err) {
+    console.error("Update Product Err", err);
+
+    throw new Error("Something went wrong! Internal server error.");
+  }
+};
