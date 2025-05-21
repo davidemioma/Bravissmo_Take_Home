@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Input } from "./ui/input";
-import { cn, generatePriceRanges } from "@/lib/utils";
 import useFiltersState from "@/hooks/use-filters-state";
+import { usePathname, useRouter } from "next/navigation";
+import { cleanParams, cn, generatePriceRanges } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ProductTypeEnum, ProductCustomType } from "@/lib/validators/product";
 import {
@@ -18,12 +19,37 @@ type Props = {
 };
 
 const ProductFilters = ({ disabled }: Props) => {
+  const router = useRouter();
+
+  const pathname = usePathname();
+
   const { filters, setFilters } = useFiltersState();
 
   const priceRanges = generatePriceRanges({
     maxPrice: filters.maxFilterPrice || 200,
     step: 20,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const cleanFilters = cleanParams(filters);
+
+      const updatedSearchParams = new URLSearchParams();
+
+      Object.entries(cleanFilters).forEach(([key, value]) => {
+        updatedSearchParams.set(
+          key,
+          Array.isArray(value) ? value.join(",") : value.toString()
+        );
+      });
+
+      router.push(`${pathname}?${updatedSearchParams.toString()}`);
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [filters, pathname, router]);
 
   return (
     <div className="w-full md:sticky md:top-20 md:w-[300px] md:h-[80vh] md:overflow-y-auto md:no-scrollbar">

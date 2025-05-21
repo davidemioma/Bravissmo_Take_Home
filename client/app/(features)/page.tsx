@@ -5,11 +5,14 @@ import ProductCard from "@/components/ProductCard";
 import LoadingScreen from "@/components/LoadingScreen";
 import { getFilteredProducts } from "@/lib/data/products";
 import ProductFilters from "@/components/ProductFilters";
+import useFiltersState from "@/hooks/use-filters-state";
 
 export default function Home() {
+  const { filters } = useFiltersState();
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["get-filtered-products"],
-    queryFn: getFilteredProducts,
+    queryFn: async () => getFilteredProducts(filters),
   });
 
   if (isLoading) {

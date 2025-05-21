@@ -2,6 +2,8 @@
 
 import { ProductType } from "@/types";
 import axiosInstance from "../axios";
+import { cleanParams } from "../utils";
+import { FiltersState } from "@/hooks/use-filters-state";
 
 export const getProduct = async (id: string) => {
   const res = await axiosInstance.get(`/products/${id}`);
@@ -17,8 +19,17 @@ export const getProduct = async (id: string) => {
   return res.data.product as ProductType | null;
 };
 
-export const getFilteredProducts = async () => {
-  const res = await axiosInstance.get("/products");
+export const getFilteredProducts = async (filters: Partial<FiltersState>) => {
+  const params = cleanParams({
+    query: filters.query,
+    type: filters.type,
+    minPrice: filters.range ? filters.range[0] : filters.minPrice,
+    maxPrice: filters.range ? filters.range[1] : filters.maxPrice,
+  });
+
+  const res = await axiosInstance.get("/products", {
+    params,
+  });
 
   if (res.status !== 200) {
     console.error(
