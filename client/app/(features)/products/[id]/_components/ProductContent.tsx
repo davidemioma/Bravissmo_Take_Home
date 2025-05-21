@@ -2,18 +2,49 @@
 
 import React from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { ProductType } from "@/types";
-import { cn, formatPrice } from "@/lib/utils";
 import ProductSlider from "./ProductSliders";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { cn, formatPrice } from "@/lib/utils";
+import { addToCart } from "@/lib/actions/cart";
 import { useAuth } from "@/providers/auth-provider";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   product: ProductType | null | undefined;
 };
 
 const ProductContent = ({ product }: Props) => {
+  const queryClient = useQueryClient();
+
   const { user, isError, isLoading } = useAuth();
+
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["add-to-cart"],
+    mutationFn: async (id: string) => {
+      const res = await addToCart({ productId: id, quantity: 1 });
+
+      return res;
+    },
+    onSuccess: (res) => {
+      if (!res.success) {
+        toast.error(`Unable to add to cart!`);
+
+        return;
+      }
+
+      toast.success(res.message);
+
+      // invalidate
+      queryClient.invalidateQueries({
+        queryKey: ["get-cart-items"],
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   if (!product) return null;
 
@@ -100,30 +131,32 @@ const ProductContent = ({ product }: Props) => {
           </div>
         )}
 
-        <div className="flex items-center gap-4">
-          <Button
-            className="flex-1 bg-violet-500 hover:bg-violet-500 hover:opacity-75 transition-opacity duration-200 font-semibold rounded-full"
-            size="lg"
-            onClick={() => {}}
-            disabled={false}
-          >
-            Add To Cart
-          </Button>
-
-          {!isError && !isLoading && user?.id === product.userId && (
-            <Link
-              href={`/products/${product.id}/details`}
-              className={cn(
-                buttonVariants({
-                  variant: "secondary",
-                  className: "border border-gray-300",
-                })
-              )}
+        {!isError && !isLoading && user && (
+          <div className="flex items-center gap-4">
+            <Button
+              className="flex-1 bg-violet-500 hover:bg-violet-500 hover:opacity-75 transition-opacity duration-200 font-semibold rounded-full"
+              size="lg"
+              onClick={() => mutate(product.id)}
+              disabled={isLoading || isPending}
             >
-              Edit
-            </Link>
-          )}
-        </div>
+              Add To Cart
+            </Button>
+
+            {user.id === product.userId && (
+              <Link
+                href={`/products/${product.id}/details`}
+                className={cn(
+                  buttonVariants({
+                    variant: "secondary",
+                    className: "border border-gray-300",
+                  })
+                )}
+              >
+                Edit
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
