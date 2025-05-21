@@ -2,15 +2,70 @@
 
 import React from "react";
 import Image from "next/image";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { CartItemType } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteCartItem, updateCartItem } from "@/lib/actions/cart";
 
 type Props = {
   item: CartItemType;
 };
 
 const CartItem = ({ item }: Props) => {
+  const queryClient = useQueryClient();
+
+  const { mutate: updateHandler, isPending } = useMutation({
+    mutationKey: ["update-item", item.cartItem.id],
+    mutationFn: async (task: "add" | "reduce") => {
+      const res = await updateCartItem({
+        cartId: item.cartItem.id,
+        task,
+        quantity: 1,
+      });
+
+      return res;
+    },
+    onSuccess: (res) => {
+      if (!res.success) {
+        toast.error("Unable to update item");
+
+        return;
+      }
+
+      toast.success(res.message);
+
+      queryClient.invalidateQueries({
+        queryKey: ["get-cart-items"],
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  const { mutate: deleteHandler, isPending: isDeleting } = useMutation({
+    mutationKey: ["delete-item"],
+    mutationFn: deleteCartItem,
+    onSuccess: (res) => {
+      if (!res.success) {
+        toast.error("Unable to delete item");
+
+        return;
+      }
+
+      toast.success(res.message);
+
+      queryClient.invalidateQueries({
+        queryKey: ["get-cart-items"],
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
   return (
     <div className="space-y-5 pb-8 px-5 border-b">
       <div className="flex items-center justify-between gap-3">
@@ -43,8 +98,8 @@ const CartItem = ({ item }: Props) => {
           <Button
             className="text-lg font-semibold"
             variant="outline"
-            disabled={false}
-            onClick={() => {}}
+            disabled={isDeleting || isPending}
+            onClick={() => updateHandler("reduce")}
           >
             -
           </Button>
@@ -54,14 +109,18 @@ const CartItem = ({ item }: Props) => {
           <Button
             className="text-lg font-semibold"
             variant="outline"
-            disabled={false}
-            onClick={() => {}}
+            disabled={isDeleting || isPending}
+            onClick={() => updateHandler("add")}
           >
             +
           </Button>
         </div>
 
-        <Button variant="destructive" onClick={() => {}} disabled={false}>
+        <Button
+          variant="destructive"
+          onClick={() => deleteHandler(item.cartItem.id)}
+          disabled={isDeleting || isPending}
+        >
           Remove
         </Button>
       </div>
