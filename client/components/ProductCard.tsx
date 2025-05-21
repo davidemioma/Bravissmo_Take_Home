@@ -12,7 +12,7 @@ const ProductCard = ({ product }: Props) => {
   return (
     <Link key={product.id} href={`/products/${product.id}`}>
       <div className="bg-white border border-gray-300 rounded-b-lg cursor-pointer shadow-sm transition">
-        <div className="relative w-full aspect-video md:aspect-square overflow-hidden">
+        <div className="relative w-full aspect-square overflow-hidden">
           <Image
             className="object-cover"
             loading="lazy"
