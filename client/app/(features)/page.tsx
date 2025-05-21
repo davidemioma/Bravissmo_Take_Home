@@ -1,9 +1,10 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import ProductCard from "@/components/ProductCard";
 import LoadingScreen from "@/components/LoadingScreen";
 import { getFilteredProducts } from "@/lib/data/products";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import ProductFilters from "@/components/ProductFilters";
 
 export default function Home() {
   const { data, isLoading, isError } = useQuery({
@@ -24,12 +25,24 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-wrap gap-4">
-      {data?.map((product) => (
-        <Link key={product.id} href={`/products/${product.id}`}>
-          {product.name}
-        </Link>
-      ))}
+    <div className="space-y-5">
+      <h1 className="text-2xl font-bold">Products ({data?.length || 0})</h1>
+
+      <div className="relative flex flex-col md:flex-row gap-5">
+        <ProductFilters disabled={isLoading} />
+
+        {data && data.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {data?.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex-1 w-full h-[calc(100vh-250px)] flex items-center justify-center">
+            <p className="text-muted-foreground text-lg">No products found!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

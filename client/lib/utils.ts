@@ -50,3 +50,27 @@ export const colors = [
   { value: "maroon", label: "Maroon" },
   { value: "teal", label: "Teal" },
 ];
+
+export const generatePriceRanges = ({
+  maxPrice,
+  step,
+}: {
+  maxPrice: number;
+  step: number;
+}) => {
+  const ranges: {
+    value: number[];
+    label: string;
+  }[] = [];
+
+  for (let minPrice = 0; minPrice < maxPrice; minPrice += step) {
+    ranges.push({
+      value: [minPrice, minPrice + step],
+      label: `Up to ${formatPrice(minPrice + step, {
+        currency: "GBP",
+      })}`,
+    });
+  }
+
+  return ranges;
+};
