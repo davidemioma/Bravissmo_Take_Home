@@ -1,18 +1,26 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { toast } from "sonner";
+import DeleteBtn from "./DeleteBtn";
 import ListInput from "./ListInput";
-import { cn, colors } from "@/lib/utils";
 import { ProductType } from "@/types";
 import FilesUpload from "./FilesUpload";
+import { ArrowLeft } from "lucide-react";
+import { cn, colors } from "@/lib/utils";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createProduct, updateProduct } from "@/lib/actions/products";
+import {
+  createProduct,
+  deleteProductById,
+  updateProduct,
+} from "@/lib/actions/products";
 import {
   ProductSchema,
   ProductTypeEnum,
@@ -34,14 +42,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 type Props = {
   initialProduct?: ProductType;
 };
 
 const ProductForm = ({ initialProduct }: Props) => {
+  const router = useRouter();
+
   const queryClient = useQueryClient();
 
   const form = useForm<ProductValidator>({
@@ -123,7 +131,32 @@ const ProductForm = ({ initialProduct }: Props) => {
 
       if (!initialProduct) {
         form.reset();
+
+        router.push("/");
       }
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  const { mutate: deleteProduct, isPending: isDeleting } = useMutation({
+    mutationKey: ["delete-product"],
+    mutationFn: async (id: string) => {
+      const res = await deleteProductById(id);
+
+      return res;
+    },
+    onSuccess: (res) => {
+      if (!res.success) {
+        toast.error(`Unable to delete product!`);
+
+        return;
+      }
+
+      toast.success(res.message);
+
+      router.push("/");
     },
     onError: (err) => {
       toast.error(err.message);
@@ -182,7 +215,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                     <Input
                       placeholder="Bra..."
                       {...field}
-                      disabled={isPending}
+                      disabled={isPending || isDeleting}
                     />
                   </FormControl>
 
@@ -201,10 +234,13 @@ const ProductForm = ({ initialProduct }: Props) => {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isPending}
+                    disabled={isPending || isDeleting}
                   >
                     <FormControl>
-                      <SelectTrigger className="w-full" disabled={isPending}>
+                      <SelectTrigger
+                        className="w-full"
+                        disabled={isPending || isDeleting}
+                      >
                         <SelectValue placeholder="Select a product type..." />
                       </SelectTrigger>
                     </FormControl>
@@ -214,7 +250,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                         <SelectItem
                           key={type}
                           value={type}
-                          disabled={isPending}
+                          disabled={isPending || isDeleting}
                         >
                           {type}
                         </SelectItem>
@@ -239,7 +275,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                   <FilesUpload
                     values={field.value}
                     setValues={field.onChange}
-                    disabled={isPending}
+                    disabled={isPending || isDeleting}
                   />
                 </FormControl>
 
@@ -259,10 +295,13 @@ const ProductForm = ({ initialProduct }: Props) => {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isPending}
+                    disabled={isPending || isDeleting}
                   >
                     <FormControl>
-                      <SelectTrigger className="w-full" disabled={isPending}>
+                      <SelectTrigger
+                        className="w-full"
+                        disabled={isPending || isDeleting}
+                      >
                         <SelectValue placeholder="Select color..." />
                       </SelectTrigger>
                     </FormControl>
@@ -272,7 +311,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                         <SelectItem
                           key={color.label}
                           value={color.value}
-                          disabled={isPending}
+                          disabled={isPending || isDeleting}
                         >
                           <div className="flex items-center gap-2">
                             <div
@@ -301,7 +340,11 @@ const ProductForm = ({ initialProduct }: Props) => {
                   <FormLabel>Quantity</FormLabel>
 
                   <FormControl>
-                    <Input type="number" {...field} disabled={isPending} />
+                    <Input
+                      type="number"
+                      {...field}
+                      disabled={isPending || isDeleting}
+                    />
                   </FormControl>
 
                   <FormMessage />
@@ -319,7 +362,11 @@ const ProductForm = ({ initialProduct }: Props) => {
                   <FormLabel>Price (£)</FormLabel>
 
                   <FormControl>
-                    <Input type="number" {...field} disabled={isPending} />
+                    <Input
+                      type="number"
+                      {...field}
+                      disabled={isPending || isDeleting}
+                    />
                   </FormControl>
 
                   <FormMessage />
@@ -341,7 +388,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                       values={field.value}
                       setValues={field.onChange}
                       placeholder="Add size..."
-                      disabled={isPending}
+                      disabled={isPending || isDeleting}
                     />
                   </FormControl>
 
@@ -361,7 +408,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                       values={field.value.map(String)}
                       setValues={(values) => field.onChange(values.map(Number))}
                       placeholder="Add band size..."
-                      disabled={isPending}
+                      disabled={isPending || isDeleting}
                     />
                   </FormControl>
 
@@ -381,7 +428,7 @@ const ProductForm = ({ initialProduct }: Props) => {
                       values={field.value.map(String)}
                       setValues={(values) => field.onChange(values.map(Number))}
                       placeholder="Add cup size..."
-                      disabled={isPending}
+                      disabled={isPending || isDeleting}
                     />
                   </FormControl>
 
@@ -392,15 +439,22 @@ const ProductForm = ({ initialProduct }: Props) => {
           </div>
 
           <div className="pt-4 flex gap-4 justify-end">
-            <Button type="submit" size="lg" disabled={isPending}>
+            <Button type="submit" size="lg" disabled={isPending || isDeleting}>
               {initialProduct
                 ? `${isPending ? "Saving..." : "Save"}`
                 : `${isPending ? "Creating..." : "Create"}`}
             </Button>
 
-            <Button variant="destructive" size="lg">
-              Delete
-            </Button>
+            {initialProduct && (
+              <DeleteBtn
+                disabled={isPending || isDeleting}
+                onContinue={() => {
+                  if (!initialProduct) return;
+
+                  deleteProduct(initialProduct.id);
+                }}
+              />
+            )}
           </div>
         </form>
       </Form>

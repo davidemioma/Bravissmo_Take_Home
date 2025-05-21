@@ -24,7 +24,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-wrap gap-4">
       {data?.map((product) => (
         <Link key={product.id} href={`/products/${product.id}`}>
           {product.name}

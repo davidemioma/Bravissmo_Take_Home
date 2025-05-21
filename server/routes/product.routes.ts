@@ -201,4 +201,40 @@ router.patch(
   }
 );
 
+// DELETE /api/products/:id
+router.delete("/:id", verifyAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const currentUser = req.currentUser;
+
+    // Check if product exists
+    const product = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, id))
+      .then((res) => res[0]);
+
+    if (!product) {
+      res.status(404).json({ success: false, message: "Product not found!" });
+    }
+
+    // Check if user created that product
+    if (product.userId !== currentUser.id) {
+      res.status(401).json({
+        success: false,
+        message: "You can only delete your own product!",
+      });
+    }
+
+    await db.delete(products).where(eq(products.id, id));
+
+    res.status(200).json({ success: true, message: "Product deleted!" });
+  } catch (err) {
+    console.log("Delete product Err", err);
+
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 export default router;

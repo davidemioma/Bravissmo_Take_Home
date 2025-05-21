@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { UserType } from "@/types";
 import { useAuth } from "@clerk/nextjs";
+import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -20,6 +21,8 @@ type Props = {
 
 const UserAccount = ({ currentUser }: Props) => {
   const { signOut } = useAuth();
+
+  const queryClient = useQueryClient();
 
   return (
     <DropdownMenu>
@@ -41,7 +44,17 @@ const UserAccount = ({ currentUser }: Props) => {
           <Link href={"/products/create"}>Add a product</Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={() => signOut()}>Sign Out</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            signOut().then(() => {
+              queryClient.invalidateQueries({
+                queryKey: ["get-currentUser"],
+              });
+            });
+          }}
+        >
+          Sign Out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
