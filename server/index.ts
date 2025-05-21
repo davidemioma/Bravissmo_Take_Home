@@ -4,6 +4,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import logger from "./middleware/logger";
 import userRoutes from "./routes/user.routes";
+import cartRoutes from "./routes/cart.routes";
 import productRoutes from "./routes/product.routes";
 import { corsOptions } from "./utils/cors-options";
 
@@ -28,6 +29,8 @@ app.get("/health", (req, res) => {
 app.use("/api", userRoutes);
 
 app.use("/api/products", productRoutes);
+
+app.use("/api/cart", cartRoutes);
 
 // Run server
 app.listen(port, () => {
