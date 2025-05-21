@@ -11,7 +11,7 @@ export default function Home() {
   const { filters } = useFiltersState();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["get-filtered-products"],
+    queryKey: ["get-filtered-products", filters],
     queryFn: async () => getFilteredProducts(filters),
   });
 
@@ -23,28 +23,28 @@ export default function Home() {
     return <div>Error loading products</div>;
   }
 
-  if (!isError && !isLoading && data && data.length === 0) {
-    return <div>No products</div>;
-  }
-
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold">Products ({data?.length || 0})</h1>
 
-      <div className="relative flex flex-col md:flex-row gap-5">
+      <div className="flex flex-col md:flex-row gap-5">
         <ProductFilters disabled={isLoading} />
 
-        {data && data.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {data?.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex-1 w-full h-[calc(100vh-250px)] flex items-center justify-center">
-            <p className="text-muted-foreground text-lg">No products found!</p>
-          </div>
-        )}
+        <div className="flex-1">
+          {data && data.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {data?.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex-1 w-full h-[calc(100vh-250px)] flex items-center justify-center">
+              <p className="text-muted-foreground text-lg">
+                No products found!
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

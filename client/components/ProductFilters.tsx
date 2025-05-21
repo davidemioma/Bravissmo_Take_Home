@@ -52,7 +52,7 @@ const ProductFilters = ({ disabled }: Props) => {
   }, [filters, pathname, router]);
 
   return (
-    <div className="w-full md:sticky md:top-20 md:w-[300px] md:h-[80vh] md:overflow-y-auto md:no-scrollbar">
+    <div className="w-full md:sticky md:top-20 md:w-[250px] md:h-[80vh] md:overflow-y-auto md:no-scrollbar">
       <Accordion type="multiple" defaultValue={["item-1", "item-2"]}>
         <AccordionItem value="item-1">
           <AccordionTrigger className="font-semibold text-lg hover:no-underline">

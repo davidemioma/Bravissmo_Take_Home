@@ -5,8 +5,6 @@ import { persist, createJSONStorage } from "zustand/middleware";
 export type FiltersState = {
   query: string;
   type: ProductCustomType | "any";
-  minPrice: string;
-  maxPrice: string;
   maxFilterPrice: number;
   isCustom: boolean;
   range: number[];
@@ -20,8 +18,6 @@ type Props = {
 export const initialFiltersState: FiltersState = {
   query: "",
   type: "any",
-  maxPrice: "",
-  minPrice: "",
   maxFilterPrice: 200,
   isCustom: false,
   range: [0, 500],

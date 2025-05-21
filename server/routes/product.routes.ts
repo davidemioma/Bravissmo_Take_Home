@@ -1,6 +1,6 @@
 import express from "express";
 import { db } from "../database";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { Request } from "express";
 import { uploadFiles } from "../lib/s3";
 import { multerUpload } from "../lib/multer";
@@ -12,12 +12,48 @@ const router = express.Router();
 // GET /api/products
 router.get("/", async (req, res) => {
   try {
-    const allProducts = await db.select().from(products);
+    const conditions = [];
 
-    res.status(200).json({ success: true, products: allProducts });
+    const { query, type, minPrice, maxPrice } = req.query;
+
+    if (typeof query === "string" && query.trim()) {
+      conditions.push(
+        sql`LOWER(${products.name}) LIKE LOWER(${"%" + query.trim() + "%"})`
+      );
+    }
+
+    if (type !== "any" && typeof type === "string" && type.trim()) {
+      conditions.push(sql`${products.type} = ${type.trim()}`);
+    }
+
+    const minPriceNum = Number(minPrice) || 0;
+
+    const maxPriceNum = Number(maxPrice) || 200;
+
+    // const minPriceNum = 0;
+
+    // const maxPriceNum = 200;
+
+    if (!isNaN(minPriceNum) && minPriceNum >= 0) {
+      conditions.push(sql`${products.price} >= ${minPriceNum}`);
+    }
+
+    if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
+      conditions.push(sql`${products.price} <= ${maxPriceNum}`);
+    }
+
+    const filteredProducts = await db
+      .select()
+      .from(products)
+      .where(
+        conditions.length > 0
+          ? sql`${sql.join(conditions, sql` AND `)}`
+          : undefined
+      );
+
+    res.status(200).json({ success: true, products: filteredProducts });
   } catch (err) {
     console.log("Get filtered products Err", err);
-
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });

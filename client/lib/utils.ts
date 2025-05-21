@@ -65,7 +65,7 @@ export const generatePriceRanges = ({
 
   for (let minPrice = 0; minPrice < maxPrice; minPrice += step) {
     ranges.push({
-      value: [minPrice, minPrice + step],
+      value: [0, minPrice + step],
       label: `Up to ${formatPrice(minPrice + step, {
         currency: "GBP",
       })}`,

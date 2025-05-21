@@ -23,8 +23,8 @@ export const getFilteredProducts = async (filters: Partial<FiltersState>) => {
   const params = cleanParams({
     query: filters.query,
     type: filters.type,
-    minPrice: filters.range ? filters.range[0] : filters.minPrice,
-    maxPrice: filters.range ? filters.range[1] : filters.maxPrice,
+    minPrice: filters.range ? filters.range[0] : 0,
+    maxPrice: filters.range ? filters.range[1] : 200,
   });
 
   const res = await axiosInstance.get("/products", {
