@@ -49,3 +49,14 @@ export type CartItemType = {
     updatedAt: string;
   };
 };
+
+export type ReviewType = {
+  id: string;
+  userId: string;
+  productId: string;
+  name: string;
+  comment: string;
+  rating: number;
+  createdAt: string;
+  updatedAt: string;
+};
