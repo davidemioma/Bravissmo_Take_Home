@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import logger from "./middleware/logger";
 import userRoutes from "./routes/user.routes";
 import cartRoutes from "./routes/cart.routes";
+import reviewRoutes from "./routes/reviews.routes";
 import productRoutes from "./routes/product.routes";
 import { corsOptions } from "./utils/cors-options";
 
@@ -31,6 +32,8 @@ app.use("/api", userRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/api/cart", cartRoutes);
+
+app.use("/api/reviews", reviewRoutes);
 
 // Run server
 app.listen(port, () => {
